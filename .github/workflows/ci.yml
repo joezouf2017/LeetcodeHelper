@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Matches the engines field. better-sqlite3 needs 22+ for its native
+          # build, and the test runner needs 22.12+.
+          node-version: "22.12"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      # The catalog tests assert the counts the README quotes, so a change to
+      # either that is not matched in the other fails here rather than silently
+      # leaving the documentation wrong.
+      - run: npm test
+
+      - run: npm run build

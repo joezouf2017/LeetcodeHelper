@@ -10,6 +10,13 @@ that bookkeeping for you: every problem you solve comes back on a widening
 schedule until it sticks, and the day's queue is assembled for you instead of
 being something you have to decide.
 
+![The tracker: today's due reviews and new problems, above the full list grouped by category](docs/screenshots/tracker.png)
+
+Write a solution and run it without leaving the page — JavaScript in a Web
+Worker, Python through Pyodide, both in your own browser:
+
+![The code runner: a Monaco editor beside test cases and their results](docs/screenshots/runner.png)
+
 ## Status
 
 **Working.** Everything the roadmap below has ticked is built and in use: the
@@ -20,6 +27,10 @@ would add compiled languages at the cost of requiring Docker.
 
 ## Quick Start
 
+Node 22.12 or newer. The floor is not arbitrary: better-sqlite3 builds a native
+binding against your Node version and needs 22+, and the test runner needs
+22.12+.
+
 ```bash
 npm install
 npm run dev
@@ -29,6 +40,12 @@ Then open http://localhost:3000.
 
 No API keys, no environment variables, no account. Progress is stored in a
 local SQLite file under `data/`, which is git-ignored.
+
+There is no hosted demo, and that is a design consequence rather than an
+omission: progress lives in a SQLite file on the server's disk, and the
+serverless platforms this would otherwise deploy to have an ephemeral
+filesystem — every request could land on a different, empty database. Running
+it locally is the intended way to use it.
 
 The code editor and the Python runtime are fetched from a public CDN the first
 time you open the runner, so that part needs a network connection. Nothing of
