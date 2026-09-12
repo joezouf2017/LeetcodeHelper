@@ -8,14 +8,24 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Two majors rather than one pinned patch. The first version of this
+        # workflow pinned 22.12 — the exact floor the engines field allowed —
+        # and better-sqlite3's Linux prebuild segfaults on construction there.
+        # A matrix of majors tracks what people actually install.
+        node: [22, 24]
+
+    name: check (node ${{ matrix.node }})
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          # Matches the engines field. better-sqlite3 needs 22+ for its native
-          # build, and the test runner needs 22.12+.
-          node-version: "22.12"
+          node-version: ${{ matrix.node }}
           cache: npm
 
       - run: npm ci

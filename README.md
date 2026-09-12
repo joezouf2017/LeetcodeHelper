@@ -27,9 +27,10 @@ would add compiled languages at the cost of requiring Docker.
 
 ## Quick Start
 
-Node 22.12 or newer. The floor is not arbitrary: better-sqlite3 builds a native
-binding against your Node version and needs 22+, and the test runner needs
-22.12+.
+Node 22.14 or newer. The floor is measured rather than guessed: better-sqlite3
+ships a prebuilt native binding, and on Linux that binding segfaults the moment
+a database is opened on Node 22.12 and 22.13. It works from 22.14 onward, and
+on 24.
 
 ```bash
 npm install

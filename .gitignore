@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/.vitest
 
 # local sqlite progress db — user data, never committed
 /data/*.db
