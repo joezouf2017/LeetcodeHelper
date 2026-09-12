@@ -14,10 +14,22 @@ being something you have to decide.
 
 ![The tracker: today's due reviews and new problems, above the full list grouped by category](docs/screenshots/tracker.png)
 
-Write a solution and run it without leaving the page — JavaScript in a Web
-Worker, Python through Pyodide, both in your own browser:
-
 ![The code runner: a Monaco editor beside test cases and their results](docs/screenshots/runner.png)
+
+## Features
+
+- **A day's work, chosen for you.** Everything whose review has come due, then
+  a few new problems drawn from one category at a time so topics get finished
+  rather than sampled. The number of new problems per day is yours to set.
+- **Categories that collapse**, each with its own completion bar, so 150
+  problems are a page you can read rather than a wall.
+- **Notes with a shape.** The pattern, the one insight worth re-reading, the
+  full working, and links to related problems — kept apart so a review costs
+  two lines instead of an essay.
+- **Code without leaving the page.** Monaco, JavaScript in a Web Worker, Python
+  through Pyodide, your own test cases, and the last 30 runs per problem.
+- **Lists you assemble yourself**, picked from the merged pool of 168 problems
+  and filtered by source list, category or difficulty.
 
 ## Quick Start
 
@@ -83,17 +95,6 @@ Two rules are worth stating, because neither is obvious:
   the schedule starts over.
 - **An unaided solve never lands on level 1**, because level 1 *means* "needed
   a hint". Solving one cold from scratch starts at level 2.
-
-## Roadmap
-
-- [x] Problem catalogs for the three built-in lists, with validation tests
-- [x] SQLite persistence layer and the progress API
-- [x] Collapsible category list with per-category completion bars
-- [x] Notes panel and the review actions that drive the schedule
-- [x] "Today" panel — problems due for review plus a configurable number of new ones
-- [x] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
-- [x] Custom lists assembled from the merged 168-problem pool
-- [ ] Optional Piston integration for compiled languages, at the cost of Docker
 
 ## Project Structure
 
