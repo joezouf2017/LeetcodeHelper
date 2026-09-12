@@ -10,6 +10,7 @@ import type { Progress } from "./db";
 import type { ListProblem } from "./lists/blind75";
 import type { ProblemList } from "./lists/problem-lists";
 import type { Difficulty } from "./lists/types";
+import { MASTERED, type MasteryLevel } from "./spaced-repetition";
 
 export interface ProblemView {
   problem: ListProblem;
@@ -32,6 +33,13 @@ export interface ListView {
   solved: number;
   due: number;
   percent: number;
+}
+
+/** Where a problem sits on the ladder, in words rather than a bare number. */
+export function masteryLabel(mastery: MasteryLevel): string {
+  if (mastery === 0) return "Not started";
+  if (mastery === MASTERED) return "Mastered";
+  return `Level ${mastery} of ${MASTERED}`;
 }
 
 /** How a row announces its next review, or null when none is scheduled. */

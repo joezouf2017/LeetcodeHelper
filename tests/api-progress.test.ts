@@ -64,6 +64,35 @@ describe("PATCH", () => {
     expect((await res.json()).progress.notes).toBe("one-pass hash");
   });
 
+  it("round-trips notes containing newlines, quotes and non-ASCII text", async () => {
+    // The notes box is free text a user pastes code and prose into; it has to
+    // survive JSON encoding and SQLite storage unchanged.
+    const notes = `dp[i] = max(dp[i-1], 0) + a[i]\n"卡дан" — O(n) / O(1)\t<tab>\\n`;
+    const saved = (await (await patch({ problemId: "two-sum", notes })).json())
+      .progress.notes;
+    expect(saved).toBe(notes);
+    const reread = await (await GET()).json();
+    expect(reread.progress["two-sum"].notes).toBe(notes);
+  });
+
+  it("lets notes be cleared back to empty", async () => {
+    await patch({ problemId: "two-sum", notes: "something" });
+    const res = await patch({ problemId: "two-sum", notes: "" });
+    expect((await res.json()).progress.notes).toBe("");
+  });
+
+  it("keeps notes across a review, and keeps mastery across a notes edit", async () => {
+    await patch({ problemId: "two-sum", notes: "sort then scan" });
+    await patch({ problemId: "two-sum", review: "independent" });
+    await patch({ problemId: "two-sum", notes: "sort then scan, two pointers" });
+    const { progress } = await (await GET()).json();
+    expect(progress["two-sum"]).toMatchObject({
+      notes: "sort then scan, two pointers",
+      mastery: 2,
+      status: "reviewing",
+    });
+  });
+
   it("records a review and returns the new schedule", async () => {
     const res = await patch({ problemId: "two-sum", review: "independent" });
     const { progress } = await res.json();

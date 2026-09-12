@@ -2,7 +2,7 @@
 // categories, counting completion, and applying the difficulty filter.
 
 import { describe, expect, it } from "vitest";
-import { buildListView, reviewLabel } from "@/lib/list-view";
+import { buildListView, masteryLabel, reviewLabel } from "@/lib/list-view";
 import type { Progress } from "@/lib/db";
 import type { ProblemList } from "@/lib/lists/problem-lists";
 import { getListById } from "@/lib/lists/problem-lists";
@@ -108,6 +108,18 @@ describe("counting", () => {
       true,
       false,
     ]);
+  });
+});
+
+describe("masteryLabel", () => {
+  it("names the two ends of the ladder instead of numbering them", () => {
+    expect(masteryLabel(0)).toBe("Not started");
+    expect(masteryLabel(5)).toBe("Mastered");
+  });
+
+  it("numbers the levels in between", () => {
+    expect(masteryLabel(1)).toBe("Level 1 of 5");
+    expect(masteryLabel(4)).toBe("Level 4 of 5");
   });
 });
 

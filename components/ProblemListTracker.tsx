@@ -13,7 +13,9 @@ import {
   ExternalLink,
   Lock,
   RotateCcw,
+  StickyNote,
 } from "lucide-react";
+import { ProblemSheet } from "@/components/ProblemSheet";
 import { useProgress } from "@/hooks/useProgress";
 import { buildListView, reviewLabel, type ProblemView } from "@/lib/list-view";
 import type { ProblemStatus } from "@/lib/db";
@@ -84,14 +86,17 @@ function ProblemRow({
   view,
   today,
   onCycleStatus,
+  onOpenNotes,
 }: {
   view: ProblemView;
   today: string;
   onCycleStatus: () => void;
+  onOpenNotes: () => void;
 }) {
   const { problem, progress, isDue } = view;
   const status = progress?.status ?? "todo";
   const label = reviewLabel(progress?.nextReviewAt ?? null, today);
+  const hasNotes = (progress?.notes ?? "") !== "";
 
   return (
     <div
@@ -111,12 +116,11 @@ function ProblemRow({
         <StatusIcon status={status} />
       </button>
 
-      <a
-        href={problemUrl(problem)}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={onOpenNotes}
         className={cn(
-          "group flex min-w-0 flex-1 items-center gap-1.5 hover:underline",
+          "flex min-w-0 flex-1 cursor-pointer items-center gap-1.5 text-left hover:underline",
           status === "solved" && "text-muted-foreground",
         )}
       >
@@ -127,8 +131,13 @@ function ProblemRow({
             aria-label="LeetCode Premium — links to a free mirror"
           />
         )}
-        <ExternalLink className="size-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-      </a>
+        {hasNotes && (
+          <StickyNote
+            className="size-3 shrink-0 text-muted-foreground"
+            aria-label="Has notes"
+          />
+        )}
+      </button>
 
       {label && (
         <span
@@ -153,19 +162,37 @@ function ProblemRow({
       >
         {problem.difficulty}
       </span>
+
+      <a
+        href={problemUrl(problem)}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Open ${problem.title} on LeetCode`}
+        className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+      >
+        <ExternalLink className="size-3.5" />
+      </a>
     </div>
   );
 }
 
 export function ProblemListTracker({ list }: { list: ProblemList }) {
-  const { progress, today, loading, error, setStatus } = useProgress();
+  const { progress, today, loading, error, setStatus, setNotes, recordReview } =
+    useProgress();
   const [difficulties, setDifficulties] = useState<Difficulty[]>(DIFFICULTIES);
   const [open, setOpen] = useState<Set<string>>(new Set());
+  // Only the id is held, so the panel always reads the live progress record
+  // rather than a copy taken when it was opened.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const view = useMemo(
     () => buildListView(list, progress, today, difficulties),
     [list, progress, today, difficulties],
   );
+
+  const selected = selectedId
+    ? list.problems.find((p) => p.id === selectedId)
+    : undefined;
 
   function toggleDifficulty(difficulty: Difficulty) {
     setDifficulties((prev) =>
@@ -267,12 +294,31 @@ export function ProblemListTracker({ list }: { list: ProblemList }) {
                         NEXT_STATUS[problemView.progress?.status ?? "todo"],
                       )
                     }
+                    onOpenNotes={() => setSelectedId(problemView.problem.id)}
                   />
                 ))}
               </CollapsibleContent>
             </Collapsible>
           ))}
         </div>
+      )}
+
+      {selected && (
+        // Keyed by problem, so opening a different one remounts the panel and
+        // an unsaved draft can never follow you to another problem.
+        <ProblemSheet
+          key={selected.id}
+          problem={selected}
+          category={selected.category}
+          progress={progress[selected.id] ?? null}
+          today={today}
+          open
+          onOpenChange={(next) => {
+            if (!next) setSelectedId(null);
+          }}
+          onSaveNotes={(notes) => setNotes(selected.id, notes)}
+          onReview={(mode) => recordReview(selected.id, mode)}
+        />
       )}
     </div>
   );
