@@ -105,6 +105,16 @@ describe("built-in list registry", () => {
     }
   });
 
+  it("keeps the per-list category counts the README advertises", () => {
+    const counts = Object.fromEntries(
+      BUILTIN_LISTS.map((l) => [
+        l.id,
+        new Set(l.problems.map((p) => p.category)).size,
+      ]),
+    );
+    expect(counts).toEqual({ neetcode150: 18, blind75: 13, grind75: 15 });
+  });
+
   it("resolves lists by id, and returns undefined for unknown ids", () => {
     expect(getListById("blind75")?.name).toBe("Blind 75");
     expect(getListById("nope")).toBeUndefined();
@@ -116,6 +126,29 @@ describe("merged global problem pool", () => {
     const all = getAllProblems();
     expect(all).toHaveLength(168);
     expect(duplicateIds(all.map((p) => p.id))).toEqual([]);
+  });
+
+  it("carries 7 premium problems, each with a free mirror", () => {
+    const premium = getAllProblems().filter((p) => p.premium);
+    expect(premium).toHaveLength(7);
+    expect(premium.filter((p) => !p.freeUrl)).toEqual([]);
+  });
+
+  it("agrees on premium status wherever lists share a problem", () => {
+    // getAllProblems() keeps the first record it sees, so a problem flagged
+    // premium in one list and not in another would silently lose its free
+    // mirror link depending on which list was registered first.
+    const canonical = new Map<string, boolean>();
+    const conflicts: string[] = [];
+    for (const list of BUILTIN_LISTS) {
+      for (const p of list.problems) {
+        const known = canonical.get(p.id);
+        if (known === undefined) canonical.set(p.id, Boolean(p.premium));
+        else if (known !== Boolean(p.premium))
+          conflicts.push(`${p.id} (${list.id})`);
+      }
+    }
+    expect(conflicts).toEqual([]);
   });
 
   it("contains every id referenced by any built-in list", () => {

@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# local sqlite progress db (DESIGN.md §7.3) — user data, never committed
+/data/*.db
+/data/*.db-journal
+/data/*.db-wal
+/data/*.db-shm
+
 # next.js
 /.next/
 /out/

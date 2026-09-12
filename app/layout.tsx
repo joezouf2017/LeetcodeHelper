@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeetLoop",
+  title: "LeetcodeHelper",
   description: "间隔重复刷题追踪器 — NeetCode 150 / Blind 75 / Grind 75",
 };
 
