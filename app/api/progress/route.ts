@@ -8,6 +8,7 @@ import {
   recordReview,
   setNotes,
   setStatus,
+  type ProblemNotes,
   type ProblemStatus,
 } from "@/lib/db";
 import { getAllProblems } from "@/lib/lists/problem-lists";
@@ -19,6 +20,7 @@ export const dynamic = "force-dynamic";
 const KNOWN_PROBLEM_IDS = new Set(getAllProblems().map((p) => p.id));
 const STATUSES: ProblemStatus[] = ["todo", "reviewing", "solved"];
 const REVIEW_MODES: ReviewMode[] = ["hint", "independent"];
+const TEXT_NOTE_FIELDS = ["pattern", "notes", "keyInsight"] as const;
 
 function badRequest(message: string, status = 400): Response {
   return Response.json({ error: message }, { status });
@@ -62,12 +64,6 @@ export async function PATCH(request: Request): Promise<Response> {
     });
   }
 
-  if ("notes" in patch) {
-    const notes = patch.notes;
-    if (typeof notes !== "string") return badRequest("notes must be a string");
-    return Response.json({ progress: setNotes(problemId, notes) });
-  }
-
   if ("review" in patch) {
     const review = patch.review;
     if (!REVIEW_MODES.includes(review as ReviewMode)) {
@@ -78,5 +74,38 @@ export async function PATCH(request: Request): Promise<Response> {
     });
   }
 
-  return badRequest("Provide one of: status, notes, review");
+  const notes: Partial<ProblemNotes> = {};
+  for (const field of TEXT_NOTE_FIELDS) {
+    if (!(field in patch)) continue;
+    if (typeof patch[field] !== "string") {
+      return badRequest(`${field} must be a string`);
+    }
+    notes[field] = patch[field];
+  }
+
+  if ("relatedProblems" in patch) {
+    const related = patch.relatedProblems;
+    if (
+      !Array.isArray(related) ||
+      related.some((id) => typeof id !== "string")
+    ) {
+      return badRequest("relatedProblems must be an array of problem ids");
+    }
+    const unknown = related.filter((id) => !KNOWN_PROBLEM_IDS.has(id));
+    if (unknown.length > 0) {
+      return badRequest(`Unknown related problem: ${unknown.join(", ")}`);
+    }
+    if (related.includes(problemId)) {
+      return badRequest("A problem cannot be related to itself");
+    }
+    notes.relatedProblems = related;
+  }
+
+  if (Object.keys(notes).length > 0) {
+    return Response.json({ progress: setNotes(problemId, notes) });
+  }
+
+  return badRequest(
+    `Provide one of: status, review, ${TEXT_NOTE_FIELDS.join(", ")}, relatedProblems`,
+  );
 }

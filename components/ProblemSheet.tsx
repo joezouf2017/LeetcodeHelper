@@ -4,6 +4,10 @@
 // after solving something: write down how it worked, and say whether you
 // needed a hint.
 //
+// The four note fields follow AlgoLoop's split rather than being one big box.
+// The point is the second pass: on review you want the pattern and the key
+// insight, which are one line each, not the full write-up.
+//
 // The draft lives here rather than in the tracker so that closing the panel
 // without saving discards it. The parent keys this component by problem id, so
 // switching problems remounts it and cannot carry one problem's draft to
@@ -11,12 +15,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Lightbulb, Lock, Sparkles } from "lucide-react";
-import type { Progress } from "@/lib/db";
+import { RelatedProblemsPicker } from "@/components/RelatedProblemsPicker";
+import type { ProblemNotes, Progress } from "@/lib/db";
 import { masteryLabel, reviewLabel } from "@/lib/list-view";
 import type { ListProblem } from "@/lib/lists/blind75";
 import { MASTERED, type ReviewMode } from "@/lib/spaced-repetition";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -35,7 +41,7 @@ export interface ProblemSheetProps {
   today: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSaveNotes: (notes: string) => Promise<void>;
+  onSaveNotes: (notes: ProblemNotes) => Promise<void>;
   onReview: (mode: ReviewMode) => Promise<void>;
 }
 
@@ -43,6 +49,15 @@ function problemUrl(problem: ListProblem): string {
   return problem.premium && problem.freeUrl
     ? problem.freeUrl
     : `https://leetcode.com/problems/${problem.slug}/`;
+}
+
+function notesOf(progress: Progress | null): ProblemNotes {
+  return {
+    pattern: progress?.pattern ?? "",
+    notes: progress?.notes ?? "",
+    keyInsight: progress?.keyInsight ?? "",
+    relatedProblems: progress?.relatedProblems ?? [],
+  };
 }
 
 export function ProblemSheet({
@@ -55,23 +70,33 @@ export function ProblemSheet({
   onSaveNotes,
   onReview,
 }: ProblemSheetProps) {
-  const saved = progress?.notes ?? "";
-  const [draft, setDraft] = useState(saved);
+  const saved = notesOf(progress);
+  // Compared by value, not identity: notesOf builds a fresh object every render.
+  const savedKey = JSON.stringify(saved);
+
+  const [draft, setDraft] = useState<ProblemNotes>(saved);
   const [saving, setSaving] = useState(false);
-  const lastSynced = useRef(saved);
+  const lastSynced = useRef(savedKey);
 
   // Notes can arrive after this panel has opened, because the panel can be
   // opened before the initial GET lands. Adopt what arrives, but never
   // overwrite something the user has already typed.
   useEffect(() => {
-    if (saved === lastSynced.current) return;
-    setDraft((current) => (current === lastSynced.current ? saved : current));
-    lastSynced.current = saved;
-  }, [saved]);
+    if (savedKey === lastSynced.current) return;
+    const incoming = JSON.parse(savedKey) as ProblemNotes;
+    setDraft((current) =>
+      JSON.stringify(current) === lastSynced.current ? incoming : current,
+    );
+    lastSynced.current = savedKey;
+  }, [savedKey]);
 
   const mastery = progress?.mastery ?? 0;
   const nextReview = reviewLabel(progress?.nextReviewAt ?? null, today);
-  const dirty = draft !== saved;
+  const dirty = JSON.stringify(draft) !== savedKey;
+
+  function edit<K extends keyof ProblemNotes>(field: K, value: ProblemNotes[K]) {
+    setDraft((current) => ({ ...current, [field]: value }));
+  }
 
   async function save() {
     setSaving(true);
@@ -85,6 +110,8 @@ export function ProblemSheet({
   async function review(mode: ReviewMode) {
     setSaving(true);
     try {
+      // Writing notes and then hitting a review button is the natural order;
+      // the review must not discard what was just typed.
       if (dirty) await onSaveNotes(draft);
       await onReview(mode);
     } finally {
@@ -181,15 +208,48 @@ export function ProblemSheet({
 
           <Separator />
 
-          <section className="space-y-2">
-            <Label htmlFor="problem-notes">Notes</Label>
-            <Textarea
-              id="problem-notes"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="The idea that made it click, the case you got wrong, the complexity…"
-              className="min-h-40 resize-y font-mono text-xs"
-            />
+          <section className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="note-pattern">Pattern</Label>
+              <Input
+                id="note-pattern"
+                value={draft.pattern}
+                onChange={(e) => edit("pattern", e.target.value)}
+                placeholder="Sliding window, monotonic stack, binary search on the answer…"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="note-key-insight">Key insight</Label>
+              <Textarea
+                id="note-key-insight"
+                value={draft.keyInsight}
+                onChange={(e) => edit("keyInsight", e.target.value)}
+                placeholder="The one line you would want to read before trying it again."
+                className="min-h-16 resize-y"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="note-notes">Notes</Label>
+              <Textarea
+                id="note-notes"
+                value={draft.notes}
+                onChange={(e) => edit("notes", e.target.value)}
+                placeholder="The full working: edge cases, the case you got wrong, complexity…"
+                className="min-h-32 resize-y font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Related problems</Label>
+              <RelatedProblemsPicker
+                problemId={problem.id}
+                value={draft.relatedProblems}
+                onChange={(next) => edit("relatedProblems", next)}
+              />
+            </div>
+
             <div className="flex items-center justify-between gap-3">
               <span className="text-xs text-muted-foreground">
                 {dirty ? "Unsaved changes" : "Saved"}

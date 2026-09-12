@@ -61,6 +61,11 @@ describe("schema", () => {
       "next_review_at",
       "notes",
       "updated_at",
+      // Appended rather than slotted next to `notes`, so that a fresh database
+      // and a migrated one end up with identical column order.
+      "pattern",
+      "related_problems",
+      "key_insight",
     ]);
     const primaryKey = getDb()
       .prepare("PRAGMA table_info(progress)")
@@ -121,7 +126,7 @@ describe("setStatus", () => {
   });
 
   it("updates an existing row without disturbing notes or mastery", () => {
-    setNotes("two-sum", "hash map, one pass");
+    setNotes("two-sum", { notes: "hash map, one pass" });
     recordReview("two-sum", "independent", "2026-03-05");
     const row = setStatus("two-sum", "todo");
     expect(row.status).toBe("todo");
@@ -132,13 +137,60 @@ describe("setStatus", () => {
 
 describe("setNotes", () => {
   it("creates a row on first write and leaves the status at todo", () => {
-    const row = setNotes("3sum", "sort, then two pointers");
+    const row = setNotes("3sum", { notes: "sort, then two pointers" });
     expect(row).toMatchObject({
       problemId: "3sum",
       notes: "sort, then two pointers",
       status: "todo",
       mastery: 0,
+      pattern: "",
+      keyInsight: "",
+      relatedProblems: [],
     });
+  });
+
+  it("writes all four note fields", () => {
+    const row = setNotes("3sum", {
+      pattern: "Sort + two pointers",
+      notes: "fix a[i], then close in from both ends",
+      keyInsight: "skip duplicates on i as well as on the inner pointers",
+      relatedProblems: ["two-sum", "container-with-most-water"],
+    });
+    expect(row).toMatchObject({
+      pattern: "Sort + two pointers",
+      notes: "fix a[i], then close in from both ends",
+      keyInsight: "skip duplicates on i as well as on the inner pointers",
+      relatedProblems: ["two-sum", "container-with-most-water"],
+    });
+  });
+
+  it("leaves fields alone when they are not part of the patch", () => {
+    setNotes("3sum", { pattern: "Sort + two pointers", notes: "first draft" });
+    const row = setNotes("3sum", { notes: "second draft" });
+    expect(row.pattern).toBe("Sort + two pointers");
+    expect(row.notes).toBe("second draft");
+  });
+
+  it("keeps the order the user gave the related problems in", () => {
+    const related = ["valid-anagram", "two-sum", "3sum-closest"];
+    expect(setNotes("3sum", { relatedProblems: related }).relatedProblems).toEqual(
+      related,
+    );
+  });
+
+  it("can empty the related problems again", () => {
+    setNotes("3sum", { relatedProblems: ["two-sum"] });
+    expect(setNotes("3sum", { relatedProblems: [] }).relatedProblems).toEqual([]);
+  });
+
+  it("survives a related_problems column that is not valid JSON", () => {
+    // Hand-edited database files happen. Reading should degrade to an empty
+    // list rather than throwing and taking the whole page down.
+    setNotes("3sum", { notes: "x" });
+    getDb()
+      .prepare("UPDATE progress SET related_problems = 'not json' WHERE problem_id = '3sum'")
+      .run();
+    expect(readProgress("3sum")?.relatedProblems).toEqual([]);
   });
 });
 

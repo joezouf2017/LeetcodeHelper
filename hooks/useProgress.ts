@@ -8,17 +8,16 @@
 // The tracker derives it in buildListView instead.
 
 import { useCallback, useEffect, useState } from "react";
-import type { ProblemStatus, Progress } from "@/lib/db";
+import type { ProblemNotes, ProblemStatus, Progress } from "@/lib/db";
 import type { ReviewMode } from "@/lib/spaced-repetition";
 
 export type ProgressMap = Record<string, Progress>;
 
-interface PatchBody {
+type PatchBody = Partial<ProblemNotes> & {
   problemId: string;
   status?: ProblemStatus;
-  notes?: string;
   review?: ReviewMode;
-}
+};
 
 export function useProgress() {
   const [progress, setProgress] = useState<ProgressMap>({});
@@ -68,7 +67,8 @@ export function useProgress() {
     [patch],
   );
   const setNotes = useCallback(
-    (problemId: string, notes: string) => patch({ problemId, notes }),
+    (problemId: string, notes: Partial<ProblemNotes>) =>
+      patch({ problemId, ...notes }),
     [patch],
   );
   const recordReview = useCallback(

@@ -96,7 +96,12 @@ function ProblemRow({
   const { problem, progress, isDue } = view;
   const status = progress?.status ?? "todo";
   const label = reviewLabel(progress?.nextReviewAt ?? null, today);
-  const hasNotes = (progress?.notes ?? "") !== "";
+  const hasNotes =
+    progress !== null &&
+    (progress.pattern !== "" ||
+      progress.notes !== "" ||
+      progress.keyInsight !== "" ||
+      progress.relatedProblems.length > 0);
 
   return (
     <div

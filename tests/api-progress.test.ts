@@ -107,6 +107,59 @@ describe("PATCH", () => {
     expect(Object.keys(body.progress)).toEqual(["two-sum"]);
   });
 
+  it("writes the pattern and key insight fields", async () => {
+    const res = await patch({
+      problemId: "3sum",
+      pattern: "Sort + two pointers",
+      keyInsight: "skip duplicates on i too, not just on the inner pointers",
+    });
+    expect((await res.json()).progress).toMatchObject({
+      pattern: "Sort + two pointers",
+      keyInsight: "skip duplicates on i too, not just on the inner pointers",
+    });
+  });
+
+  it("accepts related problems that exist in the merged pool", async () => {
+    const res = await patch({
+      problemId: "3sum",
+      relatedProblems: ["two-sum", "container-with-most-water"],
+    });
+    expect((await res.json()).progress.relatedProblems).toEqual([
+      "two-sum",
+      "container-with-most-water",
+    ]);
+  });
+
+  it("rejects a related problem that is not a real problem", async () => {
+    const res = await patch({
+      problemId: "3sum",
+      relatedProblems: ["two-sum", "invented-problem"],
+    });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/invented-problem/);
+  });
+
+  it("rejects relating a problem to itself", async () => {
+    const res = await patch({ problemId: "3sum", relatedProblems: ["3sum"] });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects related problems that are not a list of strings", async () => {
+    expect(
+      (await patch({ problemId: "3sum", relatedProblems: "two-sum" })).status,
+    ).toBe(400);
+    expect(
+      (await patch({ problemId: "3sum", relatedProblems: [7] })).status,
+    ).toBe(400);
+  });
+
+  it("rejects a non-string pattern or key insight", async () => {
+    expect((await patch({ problemId: "3sum", pattern: 1 })).status).toBe(400);
+    expect((await patch({ problemId: "3sum", keyInsight: null })).status).toBe(
+      400,
+    );
+  });
+
   it("rejects a problem id that is not in any catalog", async () => {
     const res = await patch({ problemId: "not-a-real-problem", status: "todo" });
     expect(res.status).toBe(404);
