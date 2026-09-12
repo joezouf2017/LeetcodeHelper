@@ -1,8 +1,8 @@
 // Static sanity checks on the built-in problem lists.
 //
-// Every number asserted here is a claim DESIGN.md makes in prose (§2.1 and
-// §7.1). The point of the file is that those claims get measured on every
-// run instead of being trusted — if a list is ever edited, this fails first.
+// Every number asserted here is also quoted in the README. The point of the
+// file is that those numbers get measured on every run instead of being
+// trusted — if a catalog is ever edited, this fails before the docs go stale.
 
 import { describe, expect, it } from "vitest";
 import { NEETCODE150, NEETCODE150_CATEGORIES } from "@/lib/lists/neetcode150";
@@ -160,8 +160,8 @@ describe("merged global problem pool", () => {
   });
 
   it("agrees on title and difficulty wherever lists share a problem", () => {
-    // Progress is keyed by id across lists (DESIGN.md §7.2), so a shared id
-    // must not describe two different problems.
+    // Progress is keyed by id across lists, so a shared id must not describe
+    // two different problems.
     const canonical = new Map<string, string>();
     const conflicts: string[] = [];
     for (const list of BUILTIN_LISTS) {

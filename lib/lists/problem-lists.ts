@@ -23,21 +23,24 @@ export const BUILTIN_LISTS: ProblemList[] = [
   {
     id: "neetcode150",
     name: "NeetCode 150",
-    description: "150 题 · 18 分类 · 覆盖面最全,适合有 2-3 个月准备时间的用户",
+    description:
+      "150 problems across 18 categories. The broadest coverage of the three — pick this if you have two or three months.",
     sourceUrl: "https://neetcode.io/practice",
     problems: NEETCODE150.map((p, i) => ({ ...p, order: i + 1 })),
   },
   {
     id: "blind75",
     name: "Blind 75",
-    description: "75 题 · 最早的经典题单,覆盖核心高频模式,适合时间紧张的用户",
+    description:
+      "75 problems. The original list — the core recurring patterns, for when time is short.",
     sourceUrl: "https://neetcode.io/practice/practice/blind75",
     problems: BLIND75,
   },
   {
     id: "grind75",
     name: "Grind 75",
-    description: "75 题 · Blind 75 的作者按难度曲线重新排序 + 加了时间预估",
+    description:
+      "75 problems. Blind 75's author again, re-picked and ordered as a difficulty curve.",
     sourceUrl: "https://www.techinterviewhandbook.org/grind75/",
     problems: GRIND75,
   },

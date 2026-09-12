@@ -1,6 +1,5 @@
-// Scaffold placeholder. Step 3 of DESIGN.md §6 replaces this with
-// ProblemListTracker; for now it only proves the data files, Tailwind and
-// shadcn/ui are wired together.
+// Scaffold placeholder — the category tracker replaces this. For now it only
+// proves the catalogs, Tailwind and shadcn/ui are wired together.
 
 import {
   Card,
@@ -18,7 +17,8 @@ export default function Home() {
     <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">LeetcodeHelper</h1>
       <p className="mt-2 text-muted-foreground">
-        {BUILTIN_LISTS.length} 个内置题单,去重后共 {pool.length} 道题。
+        {BUILTIN_LISTS.length} built-in lists, {pool.length} distinct problems
+        once de-duplicated.
       </p>
 
       <div className="mt-8 grid gap-4">
@@ -31,7 +31,7 @@ export default function Home() {
                 <CardDescription>{list.description}</CardDescription>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
-                {list.problems.length} 题 · {categories.size} 个分类
+                {list.problems.length} problems · {categories.size} categories
               </CardContent>
             </Card>
           );

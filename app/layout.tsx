@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LeetcodeHelper",
-  description: "间隔重复刷题追踪器 — NeetCode 150 / Blind 75 / Grind 75",
+  description:
+    "Spaced-repetition tracking for NeetCode 150, Blind 75 and Grind 75.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

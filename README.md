@@ -16,9 +16,6 @@ being something you have to decide.
 the application on top of them is not built yet. See the roadmap below for what
 exists today. The home page currently renders list statistics and nothing else.
 
-The full design — data model, spaced-repetition schedule, code runner options
-and the multi-list architecture — lives in [DESIGN.md](./DESIGN.md).
-
 ## Quick Start
 
 ```bash
