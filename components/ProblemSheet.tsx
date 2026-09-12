@@ -14,7 +14,8 @@
 // another.
 
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Lightbulb, Lock, Sparkles } from "lucide-react";
+import { Code2, ExternalLink, Lightbulb, Lock, Sparkles } from "lucide-react";
+import { CodeRunnerDialog } from "@/components/CodeRunnerDialog";
 import { RelatedProblemsPicker } from "@/components/RelatedProblemsPicker";
 import type { ProblemNotes, Progress } from "@/lib/db";
 import { masteryLabel, reviewLabel } from "@/lib/list-view";
@@ -76,6 +77,7 @@ export function ProblemSheet({
 
   const [draft, setDraft] = useState<ProblemNotes>(saved);
   const [saving, setSaving] = useState(false);
+  const [runnerOpen, setRunnerOpen] = useState(false);
   const lastSynced = useRef(savedKey);
 
   // Notes can arrive after this panel has opened, because the panel can be
@@ -151,7 +153,22 @@ export function ProblemSheet({
                 of the same problem.
               </p>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setRunnerOpen(true)}
+            >
+              <Code2 className="size-4" />
+              Write and run code
+            </Button>
           </div>
+
+          <CodeRunnerDialog
+            problem={problem}
+            open={runnerOpen}
+            onOpenChange={setRunnerOpen}
+          />
 
           <Separator />
 

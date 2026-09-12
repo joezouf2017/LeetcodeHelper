@@ -26,8 +26,12 @@ npm run dev
 
 Then open http://localhost:3000.
 
-No API keys, no environment variables, no external services. Progress will be
-stored in a local SQLite file under `data/`, which is git-ignored.
+No API keys, no environment variables, no account. Progress is stored in a
+local SQLite file under `data/`, which is git-ignored.
+
+The code editor and the Python runtime are fetched from a public CDN the first
+time you open the runner, so that part needs a network connection. Nothing of
+yours is sent anywhere — see [Data & Privacy](#data--privacy).
 
 ## Commands
 
@@ -83,7 +87,7 @@ Two rules are worth stating, because neither is obvious:
 - [x] Collapsible category list with per-category completion bars
 - [x] Notes panel and the review actions that drive the schedule
 - [x] "Today" panel — problems due for review plus a configurable number of new ones
-- [ ] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
+- [x] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
 - [ ] Custom lists assembled from the merged 168-problem pool
 - [ ] Optional Piston integration for compiled languages
 
@@ -105,9 +109,16 @@ server.
 
 ## Data & Privacy
 
-Everything stays on your machine. Your progress, notes and submissions live in a
-SQLite file inside the project directory; nothing is uploaded, and there is no
-account to create. Deleting `data/` deletes all of it.
+Your data stays on your machine. Progress and notes live in a SQLite file
+inside the project directory, and draft code and run history live in the
+browser's localStorage. Nothing you write is uploaded, and there is no account
+to create. Deleting `data/` and clearing the site's storage deletes all of it.
+
+Your code is not uploaded either: it runs in a Web Worker in your own browser,
+and Python runs there too through Pyodide compiled to WebAssembly. Two assets
+*are* downloaded from jsDelivr on first use — the Monaco editor and the Pyodide
+runtime. That is a request for a static file, with none of your content
+attached, and both are cached by the browser afterwards.
 
 ## License
 
