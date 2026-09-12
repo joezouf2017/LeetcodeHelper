@@ -282,6 +282,84 @@ export function recordReview(
   return mustReadProgress(problemId);
 }
 
+// ---- Custom lists ----
+//
+// Storage only: these functions move rows, and deliberately know nothing about
+// the catalog. Joining ids to problems happens in lib/custom-lists.ts.
+
+export interface CustomListRow {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+}
+
+export interface CustomListItemRow {
+  problem_id: string;
+  category_override: string | null;
+  sort_order: number;
+}
+
+export interface StoredCustomList {
+  list: CustomListRow;
+  items: CustomListItemRow[];
+}
+
+export function insertCustomList(
+  list: { id: string; name: string; description: string },
+  items: { problemId: string; categoryOverride: string | null }[],
+): string {
+  const db = getDb();
+  db.transaction(() => {
+    db.prepare(
+      `INSERT INTO custom_lists (id, name, description, created_at)
+            VALUES (@id, @name, @description, @createdAt)`,
+    ).run({ ...list, createdAt: now() });
+
+    const insertItem = db.prepare(
+      `INSERT INTO custom_list_items (list_id, problem_id, category_override, sort_order)
+            VALUES (@listId, @problemId, @categoryOverride, @sortOrder)`,
+    );
+    items.forEach((item, index) => {
+      insertItem.run({
+        listId: list.id,
+        problemId: item.problemId,
+        categoryOverride: item.categoryOverride,
+        sortOrder: index,
+      });
+    });
+  })();
+  return list.id;
+}
+
+export function selectCustomLists(): StoredCustomList[] {
+  const db = getDb();
+  // Tie-broken by rowid, which is insertion order. created_at only has
+  // millisecond resolution, so two lists made in the same millisecond would
+  // otherwise be ordered by their random uuid — and would swap places between
+  // one page load and the next.
+  const lists = db
+    .prepare("SELECT * FROM custom_lists ORDER BY created_at, rowid")
+    .all() as CustomListRow[];
+  const items = db.prepare(
+    `SELECT problem_id, category_override, sort_order
+       FROM custom_list_items
+      WHERE list_id = ?
+      ORDER BY sort_order`,
+  );
+  return lists.map((list) => ({
+    list,
+    items: items.all(list.id) as CustomListItemRow[],
+  }));
+}
+
+export function deleteCustomList(id: string): boolean {
+  // custom_list_items cascades; progress is never touched, because a list is a
+  // view over shared progress rather than an owner of it.
+  const result = getDb().prepare("DELETE FROM custom_lists WHERE id = ?").run(id);
+  return result.changes > 0;
+}
+
 export function dueProblemIds(on: string = today()): string[] {
   return listProgress()
     .filter((p) => isDueOn(p.nextReviewAt, on))

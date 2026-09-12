@@ -12,10 +12,11 @@ being something you have to decide.
 
 ## Status
 
-**Usable, not finished.** Tracking works end to end: the category list, the
-notes panel, the review schedule and the Today panel are all in place, against
-a local SQLite database. The code runner and custom lists are not built yet,
-and the list shown is still pinned to NeetCode 150 — see the roadmap below.
+**Working.** Everything the roadmap below has ticked is built and in use: the
+category list, the notes panel, the review schedule, the Today panel, the
+in-browser code runner, and switching between the three built-in lists or one
+you assemble yourself. What is left is the optional Piston integration, which
+would add compiled languages at the cost of requiring Docker.
 
 ## Quick Start
 
@@ -65,6 +66,10 @@ is still mastered there — the same problem is the same problem. This is what
 makes it reasonable to start on Blind 75 for coverage and later switch to
 NeetCode 150 for depth without re-grinding the overlap.
 
+The same holds for lists you build yourself. A custom list stores references to
+problems, never copies of them, so deleting the list throws away the view and
+not the work behind it.
+
 ## Mastery Levels & Spaced Repetition
 
 Each problem carries a mastery level from 0 to 5, and the next review is
@@ -88,17 +93,19 @@ Two rules are worth stating, because neither is obvious:
 - [x] Notes panel and the review actions that drive the schedule
 - [x] "Today" panel — problems due for review plus a configurable number of new ones
 - [x] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
-- [ ] Custom lists assembled from the merged 168-problem pool
+- [x] Custom lists assembled from the merged 168-problem pool
 - [ ] Optional Piston integration for compiled languages
 
 ## Project Structure
 
 ```
-app/           Next.js App Router pages and API routes
-components/    UI components, including shadcn/ui primitives
-lib/lists/     The three problem catalogs and the list registry
-tests/         Vitest suites
-data/          Local SQLite database (git-ignored)
+app/              Next.js App Router pages and API routes
+components/       UI components, including shadcn/ui primitives
+hooks/            Data fetching and stored browsing preferences
+lib/lists/        The three problem catalogs and the list registry
+lib/code-runner/  The worker, and the pure parts it shares with the UI
+tests/            Vitest suites
+data/             Local SQLite database (git-ignored)
 ```
 
 ## Tech Stack
