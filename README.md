@@ -21,10 +21,7 @@ Worker, Python through Pyodide, both in your own browser:
 
 ## Quick Start
 
-Node 22.14 or newer. The floor is measured rather than guessed: better-sqlite3
-ships a prebuilt native binding, and on Linux that binding segfaults the moment
-a database is opened on Node 22.12 and 22.13. It works from 22.14 onward, and
-on 24.
+Node 22.14 or newer.
 
 ```bash
 npm install
@@ -35,12 +32,6 @@ Then open http://localhost:3000.
 
 No API keys, no environment variables, no account. Progress is stored in a
 local SQLite file under `data/`, which is git-ignored.
-
-There is no hosted demo, and that is a design consequence rather than an
-omission: progress lives in a SQLite file on the server's disk, and the
-serverless platforms this would otherwise deploy to have an ephemeral
-filesystem — every request could land on a different, empty database. Running
-it locally is the intended way to use it.
 
 The code editor and the Python runtime are fetched from a public CDN the first
 time you open the runner, so that part needs a network connection. Nothing of
@@ -65,10 +56,6 @@ yours is sent anywhere — see [Data & Privacy](#data--privacy).
 
 De-duplicated across all three, that is **168 distinct problems**. Seven of them
 are locked behind LeetCode Premium and carry a link to a free LintCode mirror.
-
-`npm test` checks every one of those numbers on each run, so the catalogs cannot
-drift from what this README claims. It is also how a real defect was found:
-LeetCode 235 was recorded as Medium in one list and Easy in the other two.
 
 ### Progress follows the problem, not the list
 
