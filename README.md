@@ -71,7 +71,7 @@ competing for your attention and problems you keep missing do not.
 
 - [x] Problem catalogs for the three built-in lists, with validation tests
 - [x] SQLite persistence layer and the progress API
-- [ ] Collapsible category list with per-category completion bars
+- [x] Collapsible category list with per-category completion bars
 - [ ] Notes panel and the review actions that drive the schedule
 - [ ] "Today" panel — problems due for review plus a configurable number of new ones
 - [ ] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)

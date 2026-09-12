@@ -22,6 +22,14 @@ export function addDays(date: string, days: number): string {
   return at.toISOString().slice(0, 10);
 }
 
+/** Whole days from `from` to `to`; negative when `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  const ms =
+    new Date(`${to}T00:00:00.000Z`).getTime() -
+    new Date(`${from}T00:00:00.000Z`).getTime();
+  return Math.round(ms / 86_400_000);
+}
+
 /** Whether a scheduled review has come around by `on`. */
 export function isDueOn(nextReviewAt: string | null, on: string): boolean {
   return nextReviewAt !== null && nextReviewAt <= on;
