@@ -12,9 +12,10 @@ being something you have to decide.
 
 ## Status
 
-**Scaffolding.** The three problem catalogs are in place and covered by tests;
-the application on top of them is not built yet. See the roadmap below for what
-exists today. The home page currently renders list statistics and nothing else.
+**Usable, not finished.** Tracking works end to end: the category list, the
+notes panel, the review schedule and the Today panel are all in place, against
+a local SQLite database. The code runner and custom lists are not built yet,
+and the list shown is still pinned to NeetCode 150 — see the roadmap below.
 
 ## Quick Start
 
@@ -35,7 +36,7 @@ stored in a local SQLite file under `data/`, which is git-ignored.
 | `npm run dev` | Start the dev server on port 3000 |
 | `npm run build` | Production build, including a TypeScript pass |
 | `npm run lint` | ESLint over the whole project |
-| `npm test` | Validate the problem catalogs (see below) |
+| `npm test` | Vitest — catalogs, scheduling, storage, migrations and the API |
 
 ## Problem Lists
 
@@ -62,10 +63,18 @@ NeetCode 150 for depth without re-grinding the overlap.
 
 ## Mastery Levels & Spaced Repetition
 
-Each problem carries a mastery level from 0 to 5. Solving it independently
-promotes it; needing a hint does not. The next review is scheduled at widening
-intervals — 1, 3, 7 and 21 days — so problems you keep getting right stop
-competing for your attention and problems you keep missing do not.
+Each problem carries a mastery level from 0 to 5, and the next review is
+scheduled at widening intervals — 1, 3, 7 and 21 days — so problems you keep
+getting right stop competing for your attention and problems you keep missing
+do not. At level 5 a problem retires and is not scheduled again.
+
+Two rules are worth stating, because neither is obvious:
+
+- **A hint resets you to level 1**, from wherever you were. Solving it with
+  help is evidence you did not know it, not evidence of slower progress, so
+  the schedule starts over.
+- **An unaided solve never lands on level 1**, because level 1 *means* "needed
+  a hint". Solving one cold from scratch starts at level 2.
 
 ## Roadmap
 
@@ -73,7 +82,7 @@ competing for your attention and problems you keep missing do not.
 - [x] SQLite persistence layer and the progress API
 - [x] Collapsible category list with per-category completion bars
 - [x] Notes panel and the review actions that drive the schedule
-- [ ] "Today" panel — problems due for review plus a configurable number of new ones
+- [x] "Today" panel — problems due for review plus a configurable number of new ones
 - [ ] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
 - [ ] Custom lists assembled from the merged 168-problem pool
 - [ ] Optional Piston integration for compiled languages
