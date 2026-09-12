@@ -1,5 +1,7 @@
 # LeetcodeHelper
 
+[![CI](https://github.com/joezouf2017/LeetcodeHelper/actions/workflows/ci.yml/badge.svg)](https://github.com/joezouf2017/LeetcodeHelper/actions/workflows/ci.yml)
+
 Spaced-repetition tracking for NeetCode 150, Blind 75 and Grind 75 — review
 what you have already solved, pick up something new, every day.
 
@@ -16,14 +18,6 @@ Write a solution and run it without leaving the page — JavaScript in a Web
 Worker, Python through Pyodide, both in your own browser:
 
 ![The code runner: a Monaco editor beside test cases and their results](docs/screenshots/runner.png)
-
-## Status
-
-**Working.** Everything the roadmap below has ticked is built and in use: the
-category list, the notes panel, the review schedule, the Today panel, the
-in-browser code runner, and switching between the three built-in lists or one
-you assemble yourself. What is left is the optional Piston integration, which
-would add compiled languages at the cost of requiring Docker.
 
 ## Quick Start
 
@@ -112,7 +106,7 @@ Two rules are worth stating, because neither is obvious:
 - [x] "Today" panel — problems due for review plus a configurable number of new ones
 - [x] In-browser code runner (JavaScript via Web Worker, Python via Pyodide)
 - [x] Custom lists assembled from the merged 168-problem pool
-- [ ] Optional Piston integration for compiled languages
+- [ ] Optional Piston integration for compiled languages, at the cost of Docker
 
 ## Project Structure
 
